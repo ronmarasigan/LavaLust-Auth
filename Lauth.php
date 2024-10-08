@@ -37,8 +37,6 @@ defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
 
  /**
   * Auth Class
-  * This will be remove in version 2.5
-  * It can still be used then as independent library
   */
 class Lauth {
 
@@ -48,6 +46,7 @@ class Lauth {
 		$this->LAVA =& lava_instance();
 		$this->LAVA->call->database();
 		$this->LAVA->call->library('session');
+		$this->LAVA->call->helper('string');
 	}
 
 	/**
@@ -84,7 +83,7 @@ class Lauth {
 		$res = $this->LAVA->db->table('users')->insert($data);
 		if($res) {
 			$this->LAVA->db->commit();
-			return true;
+			return $this->LAVA->db->last_id();
 		} else {
 			$this->LAVA->db->roll_back();
 			return false;
@@ -192,7 +191,7 @@ class Lauth {
     					->limit(1)
     					->get();
     	if($row) {
-    		return html_escape($row['username']);
+    		return $row['username'];
     	}
 	}
 
@@ -262,10 +261,10 @@ class Lauth {
 		}
 	}
 
-	public function is_user_verified($username) {
+	public function is_user_verified($email) {
 		$this->LAVA->db
 				->table('users')
-				->where('username', $username)
+				->where('email', $email)
 				->where_not_null('email_verified_at')
 				->get();
 	return $this->LAVA->db->row_count();
